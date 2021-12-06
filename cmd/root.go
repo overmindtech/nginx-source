@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"github.com/overmindtech/discovery"
-	"github.com/overmindtech/source-template/sources"
+	"github.com/overmindtech/nginx-source/sources"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 
@@ -23,7 +23,7 @@ var cfgFile string
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "source-template",
+	Use:   "nginx-source",
 	Short: "Remote primary source for kubernetes",
 	Long: `A template for building sources.
 

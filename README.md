@@ -1,27 +1,6 @@
-# Source Template
+# Nginx Source
 
-The template repository is used for creating secondary sources written in Golang.
-
-## Getting Started
-
-Follow this getting started guide to copy this template and customize it to your own requirements. Once you have followed all the steps in this process you can delete this section from the `README.md`.
-
-1. Make a copy of this template using the **Use this template** button ![use this template](https://docs.github.com/assets/images/help/repository/use-this-template-button.png)
-1. Give the new repo a name and description ![name](https://docs.github.com/assets/images/help/repository/create-repository-name.png)
-1. Click **Create repository from template**. Then [clone the new repo locally](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository).
-1. In order for our code to work, we need to replace all instances of `github.com/overmindtech/source-template` with the name of your new repo e.g. `github.com/your-username/your-source`. Use find and replace in your editor (or CLI) to do this e.g. [VSCode](https://code.visualstudio.com/docs/editor/codebasics#_find-and-replace)
-1. Install all required modules:
-    ```shell
-    go mod vendor
-    ```
-1. Run the tests to make sure the codebase works
-    ```shell
-    go test ./...
-    ```
-1. You're now ready to start writing your sources, have look in the `sources/` folder for some working example sources that you can base your source on. Remember to delete these though once you're done
-1. While you're going you should be writing tests to ensure that your source behaves the way you expect in different scenarios.
-1. In order for automatic Docker builds and pushes to work, you must create a repository secret called `CR_PAT` which contains a token that can push ti Github Container Registry. Instructions for creating this cn be found [here](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-container-registry#authenticating-to-the-container-registry)
-
+Secondary source for Nginx. TODO: README
 
 ## Config
 
@@ -49,7 +28,7 @@ kind: Source
 metadata:
   name: source-sample
 spec:
-  image: ghcr.io/overmindtech/source-template:latest
+  image: ghcr.io/overmindtech/nginx-source:latest
   replicas: 2
   manager: manager-sample
   config:

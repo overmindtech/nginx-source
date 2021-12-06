@@ -1,4 +1,4 @@
-module github.com/overmindtech/source-template
+module github.com/overmindtech/nginx-source
 
 go 1.17
 
