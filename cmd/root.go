@@ -12,6 +12,7 @@ import (
 
 	"github.com/overmindtech/discovery"
 	"github.com/overmindtech/nginx-source/sources"
+	"github.com/overmindtech/nginx-source/triggers"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 
@@ -47,9 +48,6 @@ Edit this once you have created your source
 			os.Exit(1)
 		}
 
-		// ⚠️ Your custom configration goes here
-		yourCustomFlag := viper.GetString("your-custom-flag")
-
 		log.WithFields(log.Fields{
 			"nats-servers":     natsServers,
 			"nats-name-prefix": natsNamePrefix,
@@ -57,7 +55,6 @@ Edit this once you have created your source
 			"nats-jwt-file":    natsJWTFile,
 			"nats-nkey-file":   natsNKeyFile,
 			"max-parallel":     maxParallel,
-			"your-custom-flag": yourCustomFlag,
 		}).Info("Got config")
 
 		e := discovery.Engine{
@@ -74,10 +71,12 @@ Edit this once you have created your source
 			MaxParallelExecutions: maxParallel,
 		}
 
-		// ⚠️ Here is where you add your sources
-		colourNameSource := sources.ColourNameSource{}
+		e.AddSources(&sources.NginxSource{
+			Engine: e,
+		})
 
-		e.AddSources(&colourNameSource)
+		// Register triggers
+		e.AddTriggers(triggers.AllTriggers...)
 
 		// Start HTTP server for status
 		healthCheckPort := 8080

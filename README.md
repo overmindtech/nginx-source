@@ -65,13 +65,9 @@ readinessProbe:
 
 ## Development
 
-### Running Locally
+### Dev Container
 
-The source CLI can be interacted with locally by running:
-
-```shell
-go run main.go --help
-```
+Due to the fact that this library currently uses *magic* involving Go -> C -> Python it's very sensitive to its development environment being set up correctly. Please use the provided dev container to develop this project, you can build and connect to this container using VSCode's [Remote - Containers](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) plugin, which VSCode should suggest for you automatically when you load this repo.
 
 ### Testing
 
