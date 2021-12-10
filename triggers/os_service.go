@@ -17,8 +17,9 @@ const (
 
 // Data that will be sent to the Search() method
 type TriggerData struct {
-	TriggerType TriggerType  `json:"trigger_type,omitempty"`
-	ServiceData *ServiceData `json:"service_data,omitempty"`
+	TriggerType    TriggerType    `json:"trigger_type,omitempty"`
+	TriggerItemRef *sdp.Reference `json:"trigger_item_ref,omitempty"`
+	ServiceData    *ServiceData   `json:"service_data,omitempty"`
 }
 
 // Data required if the TriggerType is "service"
@@ -76,8 +77,11 @@ var ServiceTrigger = discovery.Trigger{
 			}
 		}
 
+		ref := in.Reference()
+
 		td := TriggerData{
-			TriggerType: SERVICE,
+			TriggerType:    SERVICE,
+			TriggerItemRef: &ref,
 			ServiceData: &ServiceData{
 				Args:   args,
 				Binary: binary,

@@ -213,7 +213,9 @@ func (s *NginxSource) Search(ctx context.Context, itemContext string, query stri
 			UniqueAttribute: "configHash", // This is the SHA1 of all of the config
 			Attributes:      attributes,
 			Context:         itemContext,
-			// TODO: Linked item requests for things like HTTP endpoints,
+			LinkedItems: []*sdp.Reference{
+				triggerData.TriggerItemRef,
+			},
 		}
 
 		return []*sdp.Item{&item}, nil
