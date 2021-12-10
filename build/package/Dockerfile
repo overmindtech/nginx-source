@@ -24,7 +24,7 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o source main.go
 
 # Use distroless as minimal base image to package the source binary
 # Refer to https://github.com/GoogleContainerTools/distroless for more details
-FROM python:3.7-bullseye
+FROM python:3.7-alpine
 WORKDIR /
 # Copy just the compiled binary over from the Go container
 COPY --from=builder /workspace/source .
