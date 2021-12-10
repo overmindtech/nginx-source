@@ -20,7 +20,7 @@ import (
 )
 
 type NginxSource struct {
-	Engine discovery.Engine
+	Engine *discovery.Engine
 }
 
 // Type The type of items that this source is capable of finding
@@ -49,7 +49,7 @@ func (s *NginxSource) Contexts() []string {
 func (s *NginxSource) Get(ctx context.Context, itemContext string, query string) (*sdp.Item, error) {
 	return nil, &sdp.ItemRequestError{
 		ErrorType:   sdp.ItemRequestError_OTHER,
-		ErrorString: "Get is not supported for this source since nginx instances don't have a trult unique identifier. Use Search instead",
+		ErrorString: "Get is not supported for this source since nginx instances don't have a truly unique identifier. Use Search instead",
 		Context:     itemContext,
 	}
 }
@@ -168,7 +168,6 @@ func (s *NginxSource) Search(ctx context.Context, itemContext string, query stri
 
 		versionItem := versionItems[0]
 		configItem := configItems[0]
-
 		attrMap := make(map[string]interface{})
 
 		if stderr, err := versionItem.Attributes.Get("stderr"); err == nil {
@@ -242,10 +241,11 @@ type NginxVersionInfo struct {
 	ConfigArgs []string
 }
 
-var versionRegex = regexp.MustCompile(`^nginx version:\s+(\S+)$`)
-var builtByRegex = regexp.MustCompile(`^built by\s+(.*)$`)
-var opensslRegex = regexp.MustCompile(`^built with OpenSSL\s+(\S+)`)
-var configArgsRegex = regexp.MustCompile(`^configure arguments: (.*)$`)
+var versionRegex = regexp.MustCompile(`nginx version:\s+(\S+)`)
+var builtByRegex = regexp.MustCompile(`built by\s+(.*)`)
+var opensslRegex = regexp.MustCompile(`built with OpenSSL\s+(\S+)`)
+var configArgsRegex = regexp.MustCompile(`configure arguments: (.*)`)
+var eachArgRegex = regexp.MustCompile(`(-(\S+'.*?'|\S+)\s??)`)
 
 // parseVersionInfo Parses version information from `nginx -V`
 func parseVersionInfo(infoString string) NginxVersionInfo {
@@ -264,7 +264,13 @@ func parseVersionInfo(infoString string) NginxVersionInfo {
 	}
 
 	if matches := configArgsRegex.FindStringSubmatch(infoString); len(matches) == 2 {
-		versionInfo.ConfigArgs = append(versionInfo.ConfigArgs, strings.Split(matches[1], " ")...)
+		if argMatches := eachArgRegex.FindAllStringSubmatch(matches[1], -1); len(argMatches) > 0 {
+			for _, thisArg := range argMatches {
+				if len(thisArg) >= 2 {
+					versionInfo.ConfigArgs = append(versionInfo.ConfigArgs, thisArg[1])
+				}
+			}
+		}
 	}
 
 	return versionInfo

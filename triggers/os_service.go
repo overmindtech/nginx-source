@@ -40,7 +40,7 @@ var AllTriggers = []discovery.Trigger{
 //
 var ServiceTrigger = discovery.Trigger{
 	Type:                      "service",
-	UniqueAttributeValueRegex: regexp.MustCompile(`^nginx$`),
+	UniqueAttributeValueRegex: regexp.MustCompile(`^nginx(\.service)?$`),
 	RequestGenerator: func(in *sdp.Item) (*sdp.ItemRequest, error) {
 		var args []string
 		var binary string

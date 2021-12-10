@@ -72,7 +72,7 @@ Edit this once you have created your source
 		}
 
 		e.AddSources(&sources.NginxSource{
-			Engine: e,
+			Engine: &e,
 		})
 
 		// Register triggers
