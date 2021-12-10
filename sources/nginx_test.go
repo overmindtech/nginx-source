@@ -125,6 +125,11 @@ func TestSearch(t *testing.T) {
 
 	trigger := triggers.TriggerData{
 		TriggerType: triggers.SERVICE,
+		TriggerItemRef: &sdp.Reference{
+			Type:                 "service",
+			UniqueAttributeValue: "nginx.service",
+			Context:              "test",
+		},
 		ServiceData: &triggers.ServiceData{
 			Binary: "/usr/sbin/nginx",
 			Args:   []string{"-c", "/etc/nginx/nginx.conf"},
