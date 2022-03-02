@@ -171,12 +171,6 @@ func TestSearch(t *testing.T) {
 	})
 
 	// Start the responder engine so that it can reply to requests
-	err = responderEngine.Connect()
-
-	if err != nil {
-		t.Fatal(err)
-	}
-
 	err = responderEngine.Start()
 
 	if err != nil {
@@ -269,7 +263,7 @@ func TestSearch(t *testing.T) {
 		},
 	}
 
-	err = sourceEngine.Connect()
+	err = sourceEngine.Start()
 
 	if err != nil {
 		t.Fatal(err)
