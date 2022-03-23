@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"os"
@@ -10,6 +11,8 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/nats-io/jwt/v2"
+	"github.com/nats-io/nkeys"
 	"github.com/overmindtech/discovery"
 	"github.com/overmindtech/nginx-source/sources"
 	"github.com/overmindtech/nginx-source/triggers"
@@ -25,18 +28,15 @@ var cfgFile string
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "nginx-source",
-	Short: "Remote primary source for kubernetes",
-	Long: `A template for building sources.
-
-Edit this once you have created your source
+	Short: "Remote primary source for nginx",
+	Long: `Remote primary source for nginx that uses triggers to add data
 `,
 	Run: func(cmd *cobra.Command, args []string) {
 		// Get srcman supplied config
 		natsServers := viper.GetStringSlice("nats-servers")
 		natsNamePrefix := viper.GetString("nats-name-prefix")
-		natsCAFile := viper.GetString("nats-ca-file")
-		natsJWTFile := viper.GetString("nats-jwt-file")
-		natsNKeyFile := viper.GetString("nats-nkey-file")
+		natsJWT := viper.GetString("nats-jwt")
+		natsNKeySeed := viper.GetString("nats-nkey-seed")
 		maxParallel := viper.GetInt("max-parallel")
 		hostname, err := os.Hostname()
 
@@ -48,14 +48,34 @@ Edit this once you have created your source
 			os.Exit(1)
 		}
 
+		var natsNKeySeedLog string
+		var tokenClient discovery.TokenClient
+
+		if natsNKeySeed != "" {
+			natsNKeySeedLog = "[REDACTED]"
+		}
+
 		log.WithFields(log.Fields{
 			"nats-servers":     natsServers,
 			"nats-name-prefix": natsNamePrefix,
-			"nats-ca-file":     natsCAFile,
-			"nats-jwt-file":    natsJWTFile,
-			"nats-nkey-file":   natsNKeyFile,
 			"max-parallel":     maxParallel,
+			"nats-jwt":         natsJWT,
+			"nats-nkey-seed":   natsNKeySeedLog,
 		}).Info("Got config")
+
+		// Validate the auth params and create a token client if we are using
+		// auth
+		if natsJWT != "" || natsNKeySeed != "" {
+			var err error
+
+			tokenClient, err = createTokenClient(natsJWT, natsNKeySeed)
+
+			if err != nil {
+				log.WithFields(log.Fields{
+					"error": err.Error(),
+				}).Fatal("Error validating authentication info")
+			}
+		}
 
 		e := discovery.Engine{
 			Name: "kubernetes-source",
@@ -66,9 +86,7 @@ Edit this once you have created your source
 				MaxReconnect:    -1,
 				ReconnectWait:   1 * time.Second,
 				ReconnectJitter: 1 * time.Second,
-				CAFile:          natsCAFile,
-				NkeyFile:        natsNKeyFile,
-				JWTFile:         natsJWTFile,
+				TokenClient:     tokenClient,
 			},
 			MaxParallelExecutions: maxParallel,
 		}
@@ -211,4 +229,29 @@ func initConfig() {
 	if err := viper.ReadInConfig(); err == nil {
 		log.Infof("Using config file: %v", viper.ConfigFileUsed())
 	}
+}
+
+// createTokenClient Creates a basic token client that will authenticate to NATS
+// using the given values
+func createTokenClient(natsJWT string, natsNKeySeed string) (discovery.TokenClient, error) {
+	var kp nkeys.KeyPair
+	var err error
+
+	if natsJWT == "" {
+		return nil, errors.New("nats-jwt was blank. This is required when using authentication")
+	}
+
+	if natsNKeySeed == "" {
+		return nil, errors.New("nats-nkey-seed was blank. This is required when using authentication")
+	}
+
+	if _, err = jwt.DecodeUserClaims(natsJWT); err != nil {
+		return nil, fmt.Errorf("could not parse nats-jwt: %v", err)
+	}
+
+	if kp, err = nkeys.FromRawSeed(nkeys.PrefixByteUser, []byte(natsNKeySeed)); err != nil {
+		return nil, fmt.Errorf("could not parse nats-nkey-seed: %v", err)
+	}
+
+	return discovery.NewBasicTokenClient(natsJWT, kp), nil
 }
