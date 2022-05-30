@@ -5,7 +5,7 @@ go 1.17
 // Direct dependencies
 require (
 	github.com/nats-io/jwt/v2 v2.2.1-0.20220330180145-442af02fd36a
-	github.com/overmindtech/discovery v0.12.6
+	github.com/overmindtech/discovery v0.12.7
 	github.com/overmindtech/sdp-go v0.9.2
 	github.com/sirupsen/logrus v1.8.1
 	github.com/spf13/cobra v1.4.0
@@ -27,7 +27,7 @@ require (
 	github.com/nats-io/nats.go v1.16.0 // indirect
 	github.com/nats-io/nkeys v0.3.0
 	github.com/nats-io/nuid v1.0.1 // indirect
-	github.com/overmindtech/multiconn v0.3.1
+	github.com/overmindtech/multiconn v0.3.2
 	github.com/overmindtech/sdpcache v0.3.2 // indirect
 	github.com/overmindtech/tokenx-client v0.1.2 // indirect
 	github.com/pelletier/go-toml v1.9.5 // indirect
