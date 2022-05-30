@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/overmindtech/discovery"
+	"github.com/overmindtech/multiconn"
 	"github.com/overmindtech/nginx-source/triggers"
 	"github.com/overmindtech/sdp-go"
 )
@@ -145,8 +146,8 @@ func TestSearch(t *testing.T) {
 	responderEngine := discovery.Engine{
 		Name:                  "test-responder",
 		MaxParallelExecutions: 1,
-		NATSOptions: &discovery.NATSOptions{
-			URLs: []string{
+		NATSOptions: &multiconn.NATSConnectionOptions{
+			Servers: []string{
 				"nats://nats:4222",
 				"nats://localhost:4222",
 			},
@@ -255,8 +256,8 @@ func TestSearch(t *testing.T) {
 	sourceEngine := discovery.Engine{
 		Name:                  "nginx-source",
 		MaxParallelExecutions: 1,
-		NATSOptions: &discovery.NATSOptions{
-			URLs: []string{
+		NATSOptions: &multiconn.NATSConnectionOptions{
+			Servers: []string{
 				"nats://nats:4222",
 				"nats://localhost:4222",
 			},

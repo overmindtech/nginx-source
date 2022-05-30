@@ -131,12 +131,25 @@ func (s *NginxSource) Search(ctx context.Context, itemContext string, query stri
 		// Execute both requests
 		go func() {
 			defer wg.Done()
-			_, versionItems, versionErr = s.Engine.SendRequestSync(&versionRequest)
+			progress := sdp.RequestProgress{
+				StartTimeout: 10 * time.Second,
+				Request:      &versionRequest,
+				Responders:   make(map[string]*sdp.Responder),
+			}
+
+			versionItems, versionErr = progress.Execute(s.Engine.ManagedConnection())
 		}()
 
 		go func() {
 			defer wg.Done()
-			_, configItems, configErr = s.Engine.SendRequestSync(&configRequest)
+
+			progress := sdp.RequestProgress{
+				StartTimeout: 10 * time.Second,
+				Request:      &configRequest,
+				Responders:   make(map[string]*sdp.Responder),
+			}
+
+			configItems, configErr = progress.Execute(s.Engine.ManagedConnection())
 		}()
 
 		wg.Wait()
