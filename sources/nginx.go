@@ -64,7 +64,6 @@ func (s *NginxSource) Find(ctx context.Context, itemContext string) ([]*sdp.Item
 //
 // * `service-linux`: This looks for nginx on a linux server which has the
 // nginx service running
-//
 func (s *NginxSource) Search(ctx context.Context, itemContext string, query string) ([]*sdp.Item, error) {
 	var triggerData triggers.TriggerData
 
@@ -124,32 +123,26 @@ func (s *NginxSource) Search(ctx context.Context, itemContext string, query stri
 		wg.Add(2)
 
 		var versionItems []*sdp.Item
+		var versionErrs []*sdp.ItemRequestError
 		var versionErr error
 		var configItems []*sdp.Item
+		var configErrs []*sdp.ItemRequestError
 		var configErr error
 
 		// Execute both requests
 		go func() {
 			defer wg.Done()
-			progress := sdp.RequestProgress{
-				StartTimeout: 10 * time.Second,
-				Request:      &versionRequest,
-				Responders:   make(map[string]*sdp.Responder),
-			}
+			progress := sdp.NewRequestProgress(&versionRequest)
 
-			versionItems, versionErr = progress.Execute(s.Engine.ManagedConnection())
+			versionItems, versionErrs, versionErr = progress.Execute(s.Engine.ManagedConnection())
 		}()
 
 		go func() {
 			defer wg.Done()
 
-			progress := sdp.RequestProgress{
-				StartTimeout: 10 * time.Second,
-				Request:      &configRequest,
-				Responders:   make(map[string]*sdp.Responder),
-			}
+			progress := sdp.NewRequestProgress(&configRequest)
 
-			configItems, configErr = progress.Execute(s.Engine.ManagedConnection())
+			configItems, configErrs, configErr = progress.Execute(s.Engine.ManagedConnection())
 		}()
 
 		wg.Wait()
@@ -166,7 +159,7 @@ func (s *NginxSource) Search(ctx context.Context, itemContext string, query stri
 		if len(versionItems) != 1 {
 			return []*sdp.Item{}, &sdp.ItemRequestError{
 				ErrorType:   sdp.ItemRequestError_NOTFOUND,
-				ErrorString: fmt.Sprintf("error gathering nginx info: expected 1 version item but got %v", len(versionItems)),
+				ErrorString: fmt.Sprintf("error gathering nginx info: expected 1 version item but got %v\nErrors: %v", len(versionItems), versionErrs),
 				Context:     itemContext,
 			}
 		}
@@ -174,7 +167,7 @@ func (s *NginxSource) Search(ctx context.Context, itemContext string, query stri
 		if len(configItems) != 1 {
 			return []*sdp.Item{}, &sdp.ItemRequestError{
 				ErrorType:   sdp.ItemRequestError_NOTFOUND,
-				ErrorString: fmt.Sprintf("error gathering nginx info: expected 1 version item but got %v", len(configItems)),
+				ErrorString: fmt.Sprintf("error gathering nginx info: expected 1 version item but got %v\nErrors: %v", len(configItems), configErrs),
 				Context:     itemContext,
 			}
 		}
